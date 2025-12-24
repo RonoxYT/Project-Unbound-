@@ -1,82 +1,46 @@
-🚀 Project Unbound: Supreme Optimization (PRE-ALPHA)
+Here is the Technical Development Report (DevLog) translated into English.
 
+This document chronologically summarizes all major obstacles encountered during the creation of the "Project Unbound" kernel and how they were resolved. It is perfect for a GitHub Wiki, a dev blog, or a video script.
 
+📂 Project Unbound: Incident Report & Technical Solutions
+1. The "Split-Source" Hell (Compilation Error)
+🔴 Problem: Project failed to compile. Error: Package net.minecraft.client does not exist.
 
-⚠️ WARNING: EXPERIMENTAL BUILD ⚠️
-This is a PRE-ALPHA release. It contains bugs, instability, and experimental code. DO NOT use this on your main survival world or a production server without a backup.
+🔍 Cause: The MinecraftClientMixin was placed in the common/src folder. The server-side code was trying to access classes that only exist on the client side.
 
-Goal of this release: This version is a "Proof of Concept" released specifically for developers and technical enthusiasts to provide feedback, suggestions, and stress-test data.
+✅ Solution: Migrated the Mixin to client/src and configured a separate client.mixins.json to strictly isolate rendering code.
 
-🛑 The Problem
-Minecraft Vanilla is built on 15-year-old architecture. It runs on a single main loop: if a zombie thinks too hard, your frame rate (FPS) dies. This is the Single-Thread Bottleneck.
+2. The 20 FPS Lock (Involuntary V-Sync)
+🔴 Problem: The game launched, but FPS was hard-locked at 20, identical to the internal TPS.
 
-⚡ The Solution: Project Unbound
-Project Unbound is a surgical rewrite of the game's Kernel. We replaced the Mojang main loop with a custom Multithreaded Scheduler designed to leverage the modern power of Java 21.
+🔍 Cause: The render call (render) was trapped inside the logic loop (tick). Since the game ticks 20 times per second, it was only drawing 20 frames per second.
 
-🛠️ Key Features (V1.0 - Experimental)
-1. 🔓 Decoupled Update Loop (Unlocked FPS)
-In Vanilla, FPS is tied to TPS. If the server lags, your screen lags. Unbound separates them.
+✅ Solution: Implementation of the "Decoupled Loop". Total separation: logic runs at a fixed 20Hz, while rendering runs in a free loop (unlimited).
 
-Result: Even if the internal server drops to 5 TPS under heavy load, your game remains visually fluid at 144+ FPS. You retain full control of your movement.
+3. The "Spiral of Death" (Speed Hack Effect)
+🔴 Problem: After a loading screen or a lag spike, the game would accelerate wildly (fast-forward motion) to catch up on lost time.
 
-2. 🧠 D.A.B. (Dynamic Activation of Brains)
-Why calculate the AI of a zombie 100 blocks away? The D.A.B. system analyzes entity relevance in real-time.
+🔍 Cause: The Scheduler was accumulating lag time. If the game froze for 2 seconds, the engine attempted to execute 40 ticks instantly upon resumption.
 
-Green Zone (<32 blocks): Full AI. Vanilla behavior.
+✅ Solution: Added a Safety Cap. If the accumulated lag exceeds 100ms, the engine "forgets" the past and resumes normal flow, preventing the overload spiral.
 
-Red Zone (>32 blocks): "Lobotomy". The entity becomes dormant. It exists, acts as a physical object, but stops consuming CPU for logic.
+4. Double Ticking (2x Speed)
+🔴 Problem: Despite fixes, the game appeared to run twice as fast as normal.
 
-Gain: Reduces entity-related CPU load by ~80%.
+🔍 Cause: Calling MinecraftClient.render(true) triggered another update of Mojang's internal clock. Combined with our custom Scheduler, the game was advancing 2 steps every frame.
 
-3. ⏳ Time Dilation (Anti-Freeze)
-No more crashes when you explode too much TNT. Instead of freezing your screen, the engine activates Time Dilation.
+✅ Solution (Attempt 1): Switched to render(false) to prevent Mojang from touching the time.
 
-The simulation enters "Bullet Time" (Slow Motion) to allow the CPU to catch up.
+5. The Interpolation Bug (Stuttering Movement)
+🔴 Problem: With render(false), FPS were high, but entities appeared to "vibrate" or move in visual slow motion/stop-motion.
 
-The game slows down, but the rendering remains smooth. It adapts instead of crashing.
+🔍 Cause: Disabling Mojang's internal tick also disabled the deltaTick calculation (interpolation). The game was rendering entities at their previous tick position without smoothing movement between frames.
 
-4. 🖥️ Cyberpunk HUD
-Press F3 isn't enough. We have a custom overlay.
+✅ Final Solution: The "Tick Guard". We returned to render(true) for fluid motion, but injected a boolean lock (unbound_allowTick) into the tick() method. Only our Scheduler holds the key to authorize the game to advance logic.
 
-Real-time display of Active vs. Lobotomized (Sleep) entities.
+6. The Multithreading Deadlock (Parallel Failure)
+🔴 Problem: Attempted to calculate entity physics on multiple threads (Parallel Ticking). Result: Entities froze in place and chunks stopped loading.
 
-Visual proof of the optimization logic.
+🔍 Cause: Deadlock. Worker Threads were waiting for the Main Thread (to load chunks/collisions), while the Main Thread was waiting for the Worker Threads to finish their tasks.
 
-🐛 Current State & Known Issues
-This is where I need you. As a Pre-Alpha, expect the following:
-
-Visual Glitches: Some entities might jitter or float incorrectly due to interpolation changes.
-
-Mod Compatibility: Likely breaks compat with other heavy optimization mods (Sodium/Lithium usually fine, but core-logic mods may conflict).
-
-Physics: Entity collisions might behave weirdly during "Time Dilation".
-
-👉 I am looking for suggestions on:
-
-Scheduler stability.
-
-Handling mod conflicts.
-
-Aggressiveness of the D.A.B. system.
-
-⚙️ Technical Requirements
-This mod pushes the JVM to its limits.
-
-Minecraft: 1.21.1
-
-Loader: Fabric
-
-Java: Java 21 REQUIRED
-
-JVM Arguments: -XX:+UseZGC -XX:+ZGenerational
-
-📦 Installation
-Install Fabric Loader for Minecraft 1.21.1.
-
-Ensure you are running with a Java 21 Runtime.
-
-Drop ProjectUnbound-1.0-alpha.jar into your mods folder.
-
-Launch. Break things. Report back.
-
-Experimental project created by Ronox_.
+✅ Solution: Abandoned raw parallelism for physics. Replaced it with the D.A.B. (Lobotomy) system: instead of calculating faster, we calculate less by disabling distant entities. This proved to be far more stable and efficient.
