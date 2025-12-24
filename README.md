@@ -1,14 +1,7 @@
 Here is the Technical Development Report (DevLog) 
 
 📂 Project Unbound: Incident Report & Technical Solutions
-1. The "Split-Source" Hell (Compilation Error)
-🔴 Problem: Project failed to compile. Error: Package net.minecraft.client does not exist.
-
-🔍 Cause: The MinecraftClientMixin was placed in the common/src folder. The server-side code was trying to access classes that only exist on the client side.
-
-✅ Solution: Migrated the Mixin to client/src and configured a separate client.mixins.json to strictly isolate rendering code.
-
-2. The 20 FPS Lock (Involuntary V-Sync)
+1. The 20 FPS Lock (Involuntary V-Sync)
 🔴 Problem: The game launched, but FPS was hard-locked at 20, identical to the internal TPS.
 
 🔍 Cause: The render call (render) was trapped inside the logic loop (tick). Since the game ticks 20 times per second, it was only drawing 20 frames per second.
