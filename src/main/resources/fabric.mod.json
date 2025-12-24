@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "projectunbound",
+  "version": "${version}",
+  "name": "Project Unbound",
+  "description": "Supreme Optimization Engine - Multithreaded Core Replacement",
+  "authors": [
+    "Maxence"
+  ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.unbound.Unbound"
+    ]
+  },
+  "mixins": [
+    "projectunbound.mixins.json",
+    "projectunbound.client.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=21"
+  }
+}
