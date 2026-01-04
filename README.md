@@ -17,6 +17,7 @@
 ## 📸 Media
 <p align="center">
   <img src="https://media.forgecdn.net/attachments/1436/746/capture-da-c-cran-2025-12-24-155953-png.png" alt="Gameplay Demo" />
+  <img src="https://media.forgecdn.net/attachments/1436/745/capture-da-c-cran-2025-12-24-155918-png.png" />
 </p>
 
 ## 🛠 Technical Details
