@@ -16,7 +16,7 @@
 
 ## 📸 Media
 <p align="center">
-  <img src="[https://via.placeholder.com/800x400.png?text=Add+a+cool+GIF+of+the+mod+gameplay+here](https://media.forgecdn.net/attachments/1436/746/capture-da-c-cran-2025-12-24-155953-png.png)" alt="Gameplay Demo" />
+  <img src="https://media.forgecdn.net/attachments/1436/746/capture-da-c-cran-2025-12-24-155953-png.png" alt="Gameplay Demo" />
 </p>
 
 ## 🛠 Technical Details
