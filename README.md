@@ -1,6 +1,6 @@
 # 🌌 Project Unbound
 
-![Minecraft Version](https://img.shields.io/badge/Minecraft-1.20.1-blue?style=for-the-badge&logo=minecraft)
+![Minecraft Version](https://img.shields.io/badge/Minecraft-1.21.1-blue?style=for-the-badge&logo=minecraft)
 ![Fabric](https://img.shields.io/badge/Fabric-supported-yellowgreen?style=for-the-badge&logo=fabric)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
